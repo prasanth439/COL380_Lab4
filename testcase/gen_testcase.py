@@ -32,8 +32,8 @@ def randomString(stringLength):
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 # adjust these parameters to generate testcases
-n            = 1000    # length of text
-num_patterns = 3       # number of patterns to be searched
+n            = 30    # length of text
+num_patterns = 1       # number of patterns to be searched
 min_p        = 3        # minimum period length
 min_m        = 7        # minimum pattern length
 
