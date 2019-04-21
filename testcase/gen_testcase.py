@@ -8,7 +8,7 @@
 #   n               :length of text                                     #
 #   num_patterns    :number of patterns to be searched                  #
 #   min_p           :minimum period length                              #
-#   min_m           :minimum period length                              #
+#   min_m           :minimum pattern length                             	#
 # Format of output file:                                                #
 #   -----------------------------------------------------------------   #
 #   | n num_patterns                                                    #
@@ -32,10 +32,10 @@ def randomString(stringLength):
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 # adjust these parameters to generate testcases
-n            = 10000    # length of text
-num_patterns = 10       # number of patterns to be searched
-min_p        = 2        # minimum period length
-min_m        = 5        # minimum pattern length
+n            = 1000    # length of text
+num_patterns = 3       # number of patterns to be searched
+min_p        = 3        # minimum period length
+min_m        = 7        # minimum pattern length
 
 
 m_set = []
