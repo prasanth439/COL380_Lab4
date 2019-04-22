@@ -1,2 +1,2 @@
 all:
-	gcc mpi_hello.c -o mpi_hello
+	gcc mpi_hello.c -o mpi_hello -lm
