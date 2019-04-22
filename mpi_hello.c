@@ -1,25 +1,33 @@
 // #include <mpi.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <omp.h>
 #include <math.h>
-#define NEW(p,n) ((p)*)malloc(sizeof(p)*(n))
+#include "mpi_hello.h"
 
-
-int duelCompute(char* Z,char* Y,int* phI,int i,int j,int n,int m)
+int 
+duelCompute(char* partial_text,
+            char* patt_str,
+            int* witness_function,
+            int i,
+            int j,
+            int partial_text_size)
 {
-    int k = phI[j-i];
-    if((j+k>=n)||(Z[j+k]!=Y[k]))
+    int k = witness_function[j-i];
+    if((j+k>=partial_text_size)||(partial_text[j+k]!=patt_str[k]))
         return i;
     else
         return j;
 
 };
 
-void witness_compute(char* pat_str,int pat_len,int * witness_function,const int piY)
+void 
+witness_compute(char* pat_str,
+                int pat_len,
+                int * witness_function,
+                const int period)
 {
     witness_function[0] = 0;
-    for(int i=1;i<piY;i++)
+    for(int i=1;i<period;i++)
     {
         for(int k=0;i+k<pat_len;k++)
             if(pat_str[k]!=pat_str[i+k])
@@ -29,8 +37,17 @@ void witness_compute(char* pat_str,int pat_len,int * witness_function,const int 
             }
     }
 };
-int check_pattern(char* text,char* pattern,int pos,int pattern_length)
+// brute force checking
+int 
+check_pattern(char* text,
+            char* pattern,
+            int pos,
+            int pattern_length,
+            int text_length)
 {
+    if(pos+pattern_length>text_length)
+        return 0;
+
     for(int i=0;i<pattern_length;i++)
     {
         if(pattern[i]!=text[pos+i])
@@ -39,7 +56,14 @@ int check_pattern(char* text,char* pattern,int pos,int pattern_length)
     return 1;
 };
 
-void np_text_analysis(char* text,char* pattern,int* phIp,int n,int m,int p)
+int* 
+np_text_analysis(char* text,
+                char* pattern,
+                int* witness_function,
+                int text_length,
+                int pattern_length,
+                int witness_size
+                )
 {
     const int block_size = ceil(m/2);
     int num_blocks = n/block_size,block_offset_limit;
@@ -59,7 +83,7 @@ void np_text_analysis(char* text,char* pattern,int* phIp,int n,int m,int p)
         }
         for(int j=i+1;j<block_offset_limit;j++)
         {
-            i = duelCompute(text,pattern,phIp,i,j,n,m);
+            i = duelCompute(text,pattern,witness_function,i,j,n,m);
         }
         potential_pos[k] = i;
     }
@@ -75,12 +99,18 @@ void np_text_analysis(char* text,char* pattern,int* phIp,int n,int m,int p)
     return match_pos;
 };
 
-void p_text_analysis(char* text_str,char* patt_str,int text_length,int patt_length,int period)
+void 
+p_text_analysis(char* text_str,
+                char* patt_str,
+                int text_length,
+                int patt_length,
+                int period)
 {
     int p = period;
     int* witF = (int*)malloc(sizeof(int)*p);
     witness_compute(patt_str,patt_length,witF,p);
-    int * pos = np_text_analysis();
+    int * pos = np_text_analysis(text_str,patt_str,witF,text_length,patt_length,p);
+    // to write it //
 };
 
 
