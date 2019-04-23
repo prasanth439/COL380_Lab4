@@ -1,7 +1,7 @@
-// #include <mpi.h>
+#include <mpi.h>
+#include <math.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <math.h>
 #include "mpi_hello.h"
 
 int 
@@ -99,7 +99,7 @@ np_text_analysis(char* text,
     return match_pos;
 };
 
-void 
+int* 
 p_text_analysis(char* text_str,
                 char* patt_str,
                 int text_length,
@@ -110,53 +110,54 @@ p_text_analysis(char* text_str,
     int* witness_function = (int*)malloc(sizeof(int)*p);
     witness_compute(patt_str,patt_length,witness_function,p);
     int * pos = np_text_analysis(text_str,patt_str,witness_function,text_length,patt_length,p);
-    int u =0; //0 to p-1 
-    int k = (int)ceil(patt_length/(double)p);
-    int v =0; // kp to m-1
-    int* M = (int*)malloc(sizeof(int)*text_length);
-    int* S = (int*)malloc(sizeof(int)*p);
-    int** C;
-    int* MATCH = (int*)malloc(sizeof(int)*(text_length-patt_length));
-    for(int i=0;i<text_length;i++)
-    {
-        M[i] = 0;
-    }
+    int k = (int)floor(patt_length/(double)p);
+    int* M = (int*)calloc(text_length,sizeof(int));
+    int dim_x=ceil(text_length/(double)p),dim_y=p;
+    int size_u_v =(patt_length-(k-2)*p);
+    int* MATCH = (int*)calloc((text_length-patt_length),sizeof(int));
+
     for(int i=1;i<=pos[0];i++)
     {
         // check the u2v at i
-        M[i] = 1;
-    }
-    for(int i =0;i<p;i++)
-    {
-        S[i] = 0;
-        for(int j=0;j<S[i];j++)
+        M[pos[i]] = 1;
+        for(int j=2*p-1;j<size_u_v;j++)
         {
-            C[i][j] = 0;
-            if(/*k-1 consecutive 1s starting at i*/1)
+            if(text_str[pos[i]+j]!=patt_str[j])
             {
-                C[i][j] = 1;
+                M[pos[i]] = 0;
+                break;
             }
         }
     }
-    for(int j=0;j<=text_length-patt_length;j++)
+    for(int i =0;i<p;i++)
     {
-        int i = 0;
-        int l = 0;
-        if(/*something something*/1)
+        int count = 0;
+        for(int j=0;j<dim_x;j++)
         {
-            MATCH[j] = C[i][l];
+            if(count==k-1)
+            {
+                MATCH[i+(j-k)*p] = 1;
+            }
+            count+= (-1*M[i+p*(j-k)]+M[i+p*j]);
         }
     }
-    return 0;
-    // to write it //
+    return MATCH;
 };
 
 
 int main(int argc, char** argv) {
     // Initialize the MPI environment
-    // MPI_Init(argc, argv);
-
+    int world_size,world_rank;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    FILE* fp = fopen("testing.txt","r");
+    int a;
+    int b;
+    fscanf(fp,"%d %d",&a,&b);
+    printf("(Size:%d) (Rank:%d) (Read1:%d) (Read2:%d)\n",world_size,world_rank,a,b);
+    
     // duelCompute(text,pattern,pi,1,2,t_L,p_L);
-    // MPI_Finalize();
-    return 0;
+    MPI_Finalize();
+    // return 0;
 };
